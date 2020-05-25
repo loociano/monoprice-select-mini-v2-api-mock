@@ -3,6 +3,7 @@ Copyright 2020 Luc Rubio <luc@loociano.com>
 Plugin is licensed under the GNU Lesser General Public License v3.0.
 """
 import logging
+import random
 import socketserver
 import time
 from http.server import HTTPServer, BaseHTTPRequestHandler
@@ -30,6 +31,7 @@ class FakePrinter:
     # pylint:disable=invalid-name
     def do_GET(self) -> None:
       """Handles HTTP GET requests."""
+      self.printer.tick()
       response = 'OK'
       if self.path == '/inquiry':
         response = 'T{}/{}P{}/{}/{}{}'.format(
@@ -94,6 +96,11 @@ class FakePrinter:
       self.bed = 20
       self.target_bed = 0
       self.progress = 0
+
+    def tick(self):
+      """Simulates the pass of time."""
+      self.hotend = random.randint(20, 25)
+      self.bed = random.randint(20, 25)
 
 
 if __name__ == '__main__':
