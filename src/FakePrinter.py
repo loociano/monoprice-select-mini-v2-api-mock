@@ -4,9 +4,10 @@ Plugin is licensed under the GNU Lesser General Public License v3.0.
 """
 import logging
 import random
+import re
 import socketserver
-import time
 from http.server import HTTPServer, BaseHTTPRequestHandler
+from threading import Timer
 
 from typing import Tuple
 
@@ -36,17 +37,22 @@ class FakePrinter:
       if self.path == '/inquiry':
         response = 'T{}/{}P{}/{}/{}{}'.format(
             self.printer.hotend,
-            self.printer.target_hotend,
+            self.printer.target_hotend_temperature,
             self.printer.bed,
-            self.printer.target_bed,
+            self.printer.target_bed_temperature,
             self.printer.progress,
             'I' if self.printer.state == 'idle' else 'P')
       elif self.path == '/set?cmd=%7BP:M%7D':  # print cached model
-        time.sleep(2)
-        self.printer.state = 'printing'
+        Timer(2, self.printer.set_printer_state, ['printing']).start()
+
       elif self.path == '/set?cmd=%7BP:X%7D':  # cancel print
-        time.sleep(2)
-        self.printer.state = 'idle'
+        Timer(2, self.printer.set_printer_state, ['idle']).start()
+
+      elif self.path.startswith('/set?cmd=%7BC:T'):
+        match = re.match(r"^/set\?cmd=%7BC:T0(\d{3})%7D$", self.path)
+        if match is not None:
+          Timer(3, self.printer.set_target_hotend, [match.group(1)]).start()
+
       else:
         self._send_not_found_headers()
         self.wfile.write('Not Found'.encode('utf-8'))
@@ -92,15 +98,27 @@ class FakePrinter:
     def __init__(self):
       self.state = 'idle'
       self.hotend = 25
-      self.target_hotend = 0
+      self.target_hotend_temperature = 0
       self.bed = 20
-      self.target_bed = 0
+      self.target_bed_temperature = 0
       self.progress = 0
 
     def tick(self):
       """Simulates the pass of time."""
       self.hotend = random.randint(20, 25)
       self.bed = random.randint(20, 25)
+
+    def set_printer_state(self, state: str) -> None:
+      """Allows setting printer state with a timer."""
+      self.state = state
+
+    def set_target_hotend(self, target_hotend_temperature: int) -> None:
+      """Allows setting target hotend temperature with a timer."""
+      self.target_hotend_temperature = target_hotend_temperature
+
+    def set_target_bed(self, target_bed_temperature: int) -> None:
+      """Allows setting target bed temperature with a timer."""
+      self.target_bed_temperature = target_bed_temperature
 
 
 if __name__ == '__main__':
