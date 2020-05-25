@@ -1,6 +1,6 @@
-# Monoprice Select Mini V2
+# Monoprice Select Mini V2 API Mock
 
-Emulates the Monoprice Select Mini V2 REST API responses.
+Simulates REST API responses from Monoprice Select Mini V2 printers.
 
 ## How to run
 
