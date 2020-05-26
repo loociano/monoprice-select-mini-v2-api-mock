@@ -50,16 +50,16 @@ class FakePrinter:
       elif self.path == '/set?cmd=%7BP:X%7D':  # cancel print
         Timer(2, self.printer.set_printer_state, ['idle']).start()
 
-      elif self.path.startswith('/set?cmd=%7BC:T'):
+      elif self.path.startswith('/set?cmd=%7BC:T'):  # set target hotend temp
         match = re.match(r"^/set\?cmd=%7BC:T0(\d{3})%7D$", self.path)
         if match is not None:
-          Timer(3, self.printer.set_target_hotend_temperature,
-                [match.group(1)]).start()
-      elif self.path.startswith('/set?cmd=%7BC:P'):
+          Timer(2, self.printer.set_target_hotend_temperature,
+                [int(match.group(1))]).start()
+      elif self.path.startswith('/set?cmd=%7BC:P'):  # set target bed temp
         match = re.match(r"^/set\?cmd=%7BC:P0(\d{2})%7D$", self.path)
         if match is not None:
-          Timer(3, self.printer.set_target_bed_temperature,
-                [match.group(1)]).start()
+          Timer(2, self.printer.set_target_bed_temperature,
+                [int(match.group(1))]).start()
 
       else:
         self._send_not_found_headers()
