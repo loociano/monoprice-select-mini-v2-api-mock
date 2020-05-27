@@ -7,6 +7,7 @@ import re
 import socketserver
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from threading import Timer
+from time import sleep
 
 from typing import Tuple
 
@@ -72,13 +73,22 @@ class FakePrinter:
     def do_POST(self) -> None:
       """Handles HTTP POST requests."""
       if self.path == '/upload':
-        self._send_success_headers()
-        content_length = int(self.headers['Content-Length'])
-        self.rfile.read(content_length)
-        self.wfile.write('OK'.encode('utf-8'))
+        self._simulateUpload()
       else:
         self._send_not_found_headers()
         self.wfile.write('Not Found'.encode('utf-8'))
+
+    def _simulateUpload(self) -> None:
+      """Simulates receiving an upload request."""
+      self._send_success_headers()
+      content_length = int(self.headers['Content-Length'])
+      while content_length > 0:
+        # ~8Mbps, faster than the real printer for testing.
+        chunk = 10000 if content_length > 10000 else content_length
+        content_length -= chunk
+        self.rfile.read(chunk)
+        sleep(0.01)
+      self.wfile.write('OK'.encode('utf-8'))
 
     def _send_success_headers(self):
       """Sends HTTP OK."""
