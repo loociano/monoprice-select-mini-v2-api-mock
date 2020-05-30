@@ -27,6 +27,10 @@ class PrinterModel:
   def set_printer_state(self, state: str) -> None:
     """Allows setting printer state with a timer."""
     self.state = state
+    if state == 'printing':
+      self._simulate_printing_progress()
+    else:
+      self.progress = 0
 
   def set_target_hotend_temperature(self,
                                     target_hotend_temperature: int) -> None:
@@ -58,3 +62,16 @@ class PrinterModel:
     if self.bed < self.ROOM_TEMPERATURE - self.ROOM_TEMPERATURE_FLUCTUATION:
       self.bed = self.ROOM_TEMPERATURE - self.ROOM_TEMPERATURE_FLUCTUATION
     Timer(0.5, self._simulate_bed_preheating).start()
+
+  def _simulate_printing_progress(self):
+    """Simulates printing progress from 0 to 100 and then idle."""
+    if self.state == 'idle':
+      return
+
+    if self.progress == 100:
+      self.progress = 0
+      self.state = 'idle'
+      return
+
+    self.progress += 1
+    Timer(3, self._simulate_printing_progress).start()
