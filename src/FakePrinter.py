@@ -61,13 +61,14 @@ class FakePrinter:
         if match is not None:
           Timer(2, self.printer.set_target_bed_temperature,
                 [int(match.group(1))]).start()
-
+      elif self.path.startswith('/set?code='):  # any gcode
+        response = 'OK'
       else:
         self._send_not_found_headers()
         self.wfile.write('Not Found'.encode('utf-8'))
         return
-      self._logger.info('Response: %s', response)
       self._send_success_headers()
+      self._logger.info('Response: %s', response)
       self.wfile.write(response.encode('utf-8'))
 
     def do_POST(self) -> None:
