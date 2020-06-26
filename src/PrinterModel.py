@@ -31,6 +31,8 @@ class PrinterModel:
       self._simulate_printing_progress()
     else:
       self.progress = 0
+      self.set_target_hotend_temperature(0)
+      self.set_target_bed_temperature(0)
 
   def set_target_hotend_temperature(self,
                                     target_hotend_temperature: int) -> None:
@@ -69,8 +71,7 @@ class PrinterModel:
       return
 
     if self.progress == 100:
-      self.progress = 0
-      self.state = 'idle'
+      self.set_printer_state('idle')
       return
 
     self.progress += 1
