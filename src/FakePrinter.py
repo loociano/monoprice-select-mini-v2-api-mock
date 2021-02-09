@@ -11,6 +11,24 @@ from time import sleep
 
 from typing import Tuple
 
+WELCOME_MESSAGE = """
+<html>
+<body>
+<h1>Monoprice Select Mini V2 API Mock</h1>
+<h2>Supported Commands</h2>
+<ul>
+  <li>Get printer status: <a href="/inquiry">GET /inquiry</a></li>
+  <li>Print cached model: <a href="/set?cmd=%7BP:M%7D">GET /set?cmd=%7BP:M%7D</a></li>
+  <li>Cancel print: <a href="/set?cmd=%7BP:X%7D">GET /set?cmd=%7BP:X%7D</a></li>
+  <li>Set hot-end target temperature: <a href="/set?cmd=%7BC:T0250%7D">GET /set?cmd=%7BC:T0250%7D</a></li>
+  <li>Set bed target temperature: <a href="/set?cmd=%7BC:P060%7D">GET /set?cmd=%7BC:P060%7D</a></li>
+  <li>Send arbitrary gcode command: <a href="/set?code=M563%20S5">GET /set?code=M563%20S5</a></li>
+  <li>Upload a model. POST /upload</li>
+</ul>
+</body>
+</html>
+"""
+
 # pylint:disable=relative-beyond-top-level
 from .PrinterModel import PrinterModel
 
@@ -64,8 +82,8 @@ class FakePrinter:
       elif self.path.startswith('/set?code='):  # any gcode
         response = 'OK'
       else:
-        self._send_not_found_headers()
-        self.wfile.write('Not Found'.encode('utf-8'))
+        self._send_success_headers()
+        self.wfile.write(WELCOME_MESSAGE.encode('utf-8'))
         return
       self._send_success_headers()
       self._logger.info('Response: %s', response)
