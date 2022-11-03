@@ -65,10 +65,12 @@ class FakePrinter:
             'I' if self.printer.state == 'idle' else 'P')
       elif self.path == '/set?cmd=%7BP:M%7D':  # print cached model
         Timer(2, self.printer.set_printer_state, ['printing']).start()
-
       elif self.path == '/set?cmd=%7BP:X%7D':  # cancel print
         Timer(2, self.printer.set_printer_state, ['idle']).start()
-
+      elif self.path == '/set?cmd=%7BP:P%7D':  # Pause print.
+        pass
+      elif self.path == '/set?cmd=%7BP:R%7D':  # Resume print.
+        pass
       elif self.path.startswith('/set?cmd=%7BC:T'):  # set target hotend temp
         match = re.match(r"^/set\?cmd=%7BC:T0(\d{3})%7D$", self.path)
         if match is not None:
@@ -80,8 +82,9 @@ class FakePrinter:
           Timer(2, self.printer.set_target_bed_temperature,
                 [int(match.group(1))]).start()
       elif self.path.startswith('/set?code='):  # any gcode
-        response = 'OK'
+        pass
       else:
+        # No command was specified, display help page.
         self._send_success_headers()
         self.wfile.write(WELCOME_MESSAGE.encode('utf-8'))
         return
